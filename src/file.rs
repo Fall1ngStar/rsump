@@ -1,13 +1,12 @@
 use std::{
     fs::File,
-    io::{BufReader, Write},
+    io::{BufReader, BufWriter, Write},
 };
 
 use async_trait::async_trait;
-use eyre::{Result};
+use eyre::Result;
 
 use tokio::sync::mpsc::{Receiver, Sender};
-
 
 use crate::{
     traits::{Consumer, Producer, Wrapper},
@@ -41,10 +40,11 @@ impl Producer for FileWrapper {
 #[async_trait]
 impl Consumer for FileWrapper {
     async fn consume(&self, mut rx: Receiver<Payload>) -> Result<()> {
-        let mut file = File::create(&self.file_path)?;
+        let file = File::create(&self.file_path)?;
+        let mut writer = BufWriter::new(file);
         while let Some(payload) = rx.recv().await {
             let raw_data = rmp_serde::to_vec(&payload)?;
-            file.write_all(&raw_data)?;
+            writer.write_all(&raw_data)?;
         }
         Ok(())
     }

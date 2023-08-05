@@ -1,11 +1,12 @@
 use async_trait::async_trait;
 use bytes::Bytes;
-use eyre::{Result};
+use eyre::Result;
 use fred::{
     prelude::{ClientLike, KeysInterface, RedisClient},
     types::{RedisConfig, Scanner},
 };
-use futures::{StreamExt};
+use futures::StreamExt;
+use kdam::{tqdm, BarExt};
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, trace};
 
@@ -33,9 +34,11 @@ impl Producer for RedisWrapper {
         let _ = self.client.connect();
         let _ = self.client.wait_for_connect().await?;
         let mut stream = self.client.scan("*", Some(1000), None);
+        let mut bar = tqdm!();
         while let Some(page) = stream.next().await {
             let mut page = page?;
             let keys = page.take_results().unwrap();
+            let size = keys.len();
             let pipe = self.client.pipeline();
             for key in &keys {
                 pipe.dump(key).await?;
@@ -48,6 +51,7 @@ impl Producer for RedisWrapper {
                 };
                 tx.send(payload).await?;
             }
+            bar.update(size)?;
             page.next()?;
         }
         Ok(())

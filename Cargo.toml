@@ -16,6 +16,7 @@ color-eyre = "0.6.2"
 eyre = "0.6.8"
 fred = "6.3.0"
 futures = "0.3.28"
+kdam = "0.4.0"
 rmp-serde = "1.1.2"
 serde = { version = "1.0.180", features = ["derive"] }
 tokio = { version = "1.29.1", features = ["full"] }

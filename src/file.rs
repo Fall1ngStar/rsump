@@ -4,10 +4,10 @@ use std::{
 };
 
 use async_trait::async_trait;
-use eyre::{eyre, Result};
-use futures::{Stream, StreamExt, TryStreamExt};
+use eyre::{Result};
+
 use tokio::sync::mpsc::{Receiver, Sender};
-use tracing::{debug, trace};
+
 
 use crate::{
     traits::{Consumer, Producer, Wrapper},

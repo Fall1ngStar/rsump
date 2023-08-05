@@ -1,10 +1,11 @@
 use async_trait::async_trait;
-use eyre::{eyre, Result};
+use bytes::Bytes;
+use eyre::{Result};
 use fred::{
-    prelude::{ClientLike, KeysInterface, RedisClient, RedisError},
-    types::{RedisConfig, ScanResult, Scanner},
+    prelude::{ClientLike, KeysInterface, RedisClient},
+    types::{RedisConfig, Scanner},
 };
-use futures::{Stream, StreamExt, TryStreamExt};
+use futures::{StreamExt};
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, trace};
 
@@ -34,11 +35,16 @@ impl Producer for RedisWrapper {
         let mut stream = self.client.scan("*", Some(1000), None);
         while let Some(page) = stream.next().await {
             let mut page = page?;
-            for key in page.take_results().unwrap() {
-                let dumped = self.client.dump(&key).await?;
+            let keys = page.take_results().unwrap();
+            let pipe = self.client.pipeline();
+            for key in &keys {
+                pipe.dump(key).await?;
+            }
+            let result: Vec<Bytes> = pipe.all().await?;
+            for (dumped, key) in result.into_iter().zip(keys) {
                 let payload = Payload {
                     key: key.into_bytes(),
-                    data: dumped.into_bytes().unwrap(),
+                    data: dumped,
                 };
                 tx.send(payload).await?;
             }

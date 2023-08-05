@@ -1,6 +1,6 @@
 use clap::Parser;
 use eyre::Result;
-use fred::{prelude::RedisClient, types::RedisConfig};
+use fred::{types::RedisConfig};
 use rsump::{
     file::FileWrapper,
     redis::RedisWrapper,

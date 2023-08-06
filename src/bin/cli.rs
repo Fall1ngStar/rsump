@@ -1,6 +1,6 @@
 use clap::Parser;
 use eyre::Result;
-use fred::{types::RedisConfig};
+use fred::types::RedisConfig;
 use rsump::{
     file::FileWrapper,
     redis::RedisWrapper,
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     color_eyre::install()?;
     tracing_subscriber::fmt::init();
     let args = Args::parse();
-    let (tx, rx) = mpsc::channel::<Payload>(100);
+    let (tx, rx) = mpsc::channel::<Payload>(1000);
     let producer = to_wrapper(&args.from)?;
     let consumer = to_wrapper(&args.to)?;
     tokio::spawn(async move { producer.produce(tx.clone()).await });

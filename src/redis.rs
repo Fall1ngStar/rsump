@@ -47,7 +47,7 @@ impl RedisWrapper {
 #[async_trait]
 impl Producer for RedisWrapper {
     async fn produce(&self, tx: Sender<Payload>) -> Result<()> {
-        let _ = self.client.connect();
+        self.client.connect();
         let _ = self.client.wait_for_connect().await?;
 
         let mut bar = tqdm!(
@@ -87,7 +87,7 @@ impl Producer for RedisWrapper {
 #[async_trait]
 impl Consumer for RedisWrapper {
     async fn consume(&self, mut rx: Receiver<Payload>) -> Result<()> {
-        let _ = self.client.connect();
+        self.client.connect();
         let _ = self.client.wait_for_connect().await?;
         debug!("Started consuming");
         let mut pipe = self.client.pipeline();

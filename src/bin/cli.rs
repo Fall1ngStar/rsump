@@ -1,12 +1,7 @@
 use clap::Parser;
 use eyre::Result;
 use fred::types::RedisConfig;
-use rsump::{
-    file::FileWrapper,
-    redis::RedisWrapper,
-    traits::{Consumer, Producer, Wrapper},
-    types::Payload,
-};
+use rsump::{file::FileWrapper, redis::RedisWrapper, traits::Wrapper, types::Payload};
 use tokio::sync::mpsc;
 
 #[derive(Debug, Parser)]
@@ -19,7 +14,7 @@ struct Args {
 }
 
 fn to_wrapper(input: &str) -> Result<Box<dyn Wrapper + Sync + Send>> {
-    if let Ok(_) = RedisConfig::from_url(input) {
+    if RedisConfig::from_url(input).is_ok() {
         return Ok(Box::new(RedisWrapper::new(input).unwrap()));
     }
     Ok(Box::new(FileWrapper::new(input)))

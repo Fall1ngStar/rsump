@@ -7,7 +7,7 @@ use async_trait::async_trait;
 use eyre::Result;
 use kdam::{tqdm, BarExt};
 use tokio::sync::mpsc::{Receiver, Sender};
-use tracing_subscriber::fmt::format;
+
 
 use crate::{
     traits::{Consumer, Producer, Wrapper},
